@@ -1,7 +1,50 @@
 import cv2
 import numpy as np
+from difflib import SequenceMatcher
 
 CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+TYPE_TO_LOCATION = {
+    "SIZE": 1,
+    "VICTIM": 2,
+    "CRIME": 3,
+    "TIME": 4,
+    "PLACE": 5,
+    "MOTIVE": 6,
+    "WEAPON": 7,
+    "BANDIT": 8,
+}
+
+
+def normalize_text(text):
+    return "".join(ch for ch in text.upper() if ch.isalnum())
+
+
+def match_type_text(text, min_score=0.45):
+    text = normalize_text(text)
+    if not text:
+        return ""
+
+    if text in TYPE_TO_LOCATION:
+        return text
+
+    best = ""
+    best_score = 0.0
+
+    for option in TYPE_TO_LOCATION:
+        score = SequenceMatcher(None, text, option).ratio()
+        if option.startswith(text) or text.startswith(option):
+            score += 0.2
+        if score > best_score:
+            best = option
+            best_score = score
+
+    return best if best_score >= min_score else ""
+
+
+def type_to_location(type_text):
+    matched = match_type_text(type_text)
+    return TYPE_TO_LOCATION.get(matched)
 
 
 def extract_sign_crops(img):
@@ -137,9 +180,9 @@ def predict_char(crop, model):
 
 
 def read_sign_from_crops(type_crops, clue_crops, model):
-    type_text = "".join(predict_char(crop, model)[0] for crop in type_crops)
-    clue_text = "".join(predict_char(crop, model)[0] for crop in clue_crops)
-    return type_text, clue_text
+    raw_type = "".join(predict_char(crop, model)[0] for crop in type_crops)
+    raw_clue = "".join(predict_char(crop, model)[0] for crop in clue_crops)
+    return match_type_text(raw_type), normalize_text(raw_clue)
 
 
 def read_sign(img, model):
