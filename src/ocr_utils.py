@@ -105,9 +105,9 @@ def extract_sign_crops(img):
 
     b, g, r = cv2.split(zoomed)
     clean = cv2.subtract(b, cv2.max(g, r))
-    clean = cv2.GaussianBlur(clean, (3, 3), 0)
-    clean = cv2.threshold(clean, 30, 255, cv2.THRESH_BINARY)[1]
-    clean = cv2.erode(clean, np.ones((2, 2), np.uint8), iterations=4)
+    # clean = cv2.GaussianBlur(clean, (3, 3), 0)
+    clean = cv2.threshold(clean, 40, 255, cv2.THRESH_BINARY)[1]
+    clean = cv2.erode(clean, np.ones((2, 2), np.uint8), iterations=3)
 
     contours = cv2.findContours(clean, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[0]
     boxes = []
