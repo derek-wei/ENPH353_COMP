@@ -23,7 +23,7 @@ class SignReaderNode:
         self.published_locations = set()
 
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        default_model_path = os.path.join(os.path.dirname(script_dir), "models", "my_ocr_model.keras")
+        default_model_path = os.path.join(os.path.dirname(script_dir), "models", "353_ocr_model.keras")
         model_path = rospy.get_param("~model_path", default_model_path)
 
         if not os.path.isfile(model_path):
